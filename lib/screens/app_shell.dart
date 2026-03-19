@@ -25,12 +25,8 @@ class _AppShellState extends State<AppShell> {
     SettingsScreen(),
   ];
 
-  static const _titles = [
-    'Oracle',
-    'Library',
-    'Entities',
-    'Settings',
-  ];
+  static const _titles = ['Oracle', 'Library', 'Entities', 'Settings'];
+
   static const _subtitles = [
     'Ask grounded questions and inspect citations.',
     'Browse the ingested shelf and open sample passages.',
@@ -38,10 +34,20 @@ class _AppShellState extends State<AppShell> {
     'Switch accounts and check the connected server.',
   ];
 
+  static const _icons = [
+    Icons.auto_awesome,
+    Icons.menu_book,
+    Icons.hub,
+    Icons.tune,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final session = context.select<AuthController, dynamic>((auth) => auth.session);
+    final scheme = theme.colorScheme;
+    final session = context.select<AuthController, dynamic>(
+      (auth) => auth.session,
+    );
     final user = session?.user.username as String?;
     final role = session?.user.role as String?;
     final host = session?.account.hostLabel as String?;
@@ -52,59 +58,69 @@ class _AppShellState extends State<AppShell> {
         child: SafeArea(
           child: Column(
             children: [
+              // --- Header card ---
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    border: Border.all(color: theme.colorScheme.outlineVariant),
-                    borderRadius: BorderRadius.circular(12),
+                    color: scheme.surface,
+                    border: Border.all(color: scheme.outlineVariant),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                     child: Row(
                       children: [
+                        // Page icon
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: scheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(
+                            _icons[_index],
+                            size: 20,
+                            color: scheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Title / subtitle
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            spacing: 2,
                             children: [
                               Text(
                                 _titles[_index],
-                                style: theme.textTheme.headlineMedium,
+                                style: theme.textTheme.titleLarge,
                               ),
+                              const SizedBox(height: 2),
                               Text(
                                 _subtitles[_index],
                                 style: theme.textTheme.bodySmall,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              if (host != null || user != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8),
-                                  child: Text(
-                                    [
-                                      host,
-                                      user,
-                                      role,
-                                    ].whereType<String>().join('  ·  '),
-                                    style: theme.textTheme.bodySmall,
-                                  ),
-                                ),
                             ],
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        // Avatar
                         if (user != null)
                           Container(
                             width: 36,
                             height: 36,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainer,
-                              border: Border.all(color: theme.colorScheme.outlineVariant),
+                              color: scheme.secondaryContainer,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
                               user.isNotEmpty ? user[0].toUpperCase() : 'I',
-                              style: theme.textTheme.titleMedium,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: scheme.onSecondaryContainer,
+                              ),
                             ),
                           ),
                       ],
@@ -112,18 +128,43 @@ class _AppShellState extends State<AppShell> {
                   ),
                 ),
               ),
-              Divider(height: 1, color: theme.colorScheme.outlineVariant),
-              const Expanded(
-                child: IndexedStack(children: _pages),
+
+              // Connection badge
+              if (host != null || user != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.circle, size: 6, color: scheme.primary),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          [host, user, role].whereType<String>().join('  ·  '),
+                          style: theme.textTheme.bodySmall,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 4),
+              Divider(height: 1, color: scheme.outlineVariant),
+
+              // --- Page content ---
+              Expanded(
+                child: IndexedStack(index: _index, children: _pages),
               ),
             ],
           ),
         ),
       ),
       bottomNavigationBar: NavigationBar(
-        height: 62,
+        height: 64,
         selectedIndex: _index,
         onDestinationSelected: (value) => setState(() => _index = value),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.auto_awesome_outlined),

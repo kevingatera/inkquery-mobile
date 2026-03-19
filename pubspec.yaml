@@ -1,7 +1,7 @@
 name: inkquery_mobile
 description: Android-first Inkquery mobile client for chat, library, and entity browsing.
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.11.0
