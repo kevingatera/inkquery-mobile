@@ -15,7 +15,7 @@ class InkPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: InkqueryTheme.glassPanel(context),
+      decoration: InkqueryTheme.panelDecoration(context),
       child: Padding(
         padding: padding,
         child: child,

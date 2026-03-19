@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class InkqueryTheme {
-  static const Color _paper = Color(0xFFF4E9D8);
-  static const Color _ink = Color(0xFF101A1C);
-  static const Color _moss = Color(0xFF214E55);
-  static const Color _gold = Color(0xFFDB9F48);
-  static const Color _ember = Color(0xFFB35333);
+  static const Color paper = Color(0xFFF6F1E7);
+  static const Color _ink = Color(0xFF1E1A16);
+  static const Color _moss = Color(0xFF2C5A52);
+  static const Color _gold = Color(0xFFC48C3C);
+  static const Color _ember = Color(0xFF9F4D33);
+  static const Color _line = Color(0xFFD9D1C3);
+  static const Color _panel = Color(0xFFFFFCF7);
+  static const Color _muted = Color(0xFF655B53);
 
   static ThemeData get theme {
     final scheme = ColorScheme(
@@ -17,20 +20,20 @@ class InkqueryTheme {
       onSecondary: _ink,
       error: _ember,
       onError: Colors.white,
-      surface: const Color(0xFFF9F5EC),
+      surface: _panel,
       onSurface: _ink,
-      surfaceContainerHighest: const Color(0xFFE7E1D1),
-      onSurfaceVariant: const Color(0xFF425557),
-      outline: const Color(0xFF8EA19D),
-      outlineVariant: const Color(0xFFD7DED9),
-      shadow: Colors.black26,
+      surfaceContainerHighest: const Color(0xFFECE4D8),
+      onSurfaceVariant: _muted,
+      outline: const Color(0xFF9B9386),
+      outlineVariant: _line,
+      shadow: Colors.black12,
       scrim: Colors.black54,
       inverseSurface: _ink,
-      onInverseSurface: _paper,
+      onInverseSurface: paper,
       inversePrimary: const Color(0xFF8FC3C9),
       tertiary: _ember,
       onTertiary: Colors.white,
-      tertiaryContainer: const Color(0xFFF2D5C7),
+      tertiaryContainer: const Color(0xFFF0D7CC),
       onTertiaryContainer: _ink,
       primaryContainer: const Color(0xFFD2E5E6),
       onPrimaryContainer: _ink,
@@ -38,7 +41,7 @@ class InkqueryTheme {
       onSecondaryContainer: _ink,
       errorContainer: const Color(0xFFF7D7CF),
       onErrorContainer: _ink,
-      surfaceDim: const Color(0xFFE6DECF),
+      surfaceDim: const Color(0xFFE6DDCF),
       surfaceBright: Colors.white,
       surfaceContainerLowest: Colors.white,
       surfaceContainerLow: const Color(0xFFF7F2E9),
@@ -48,18 +51,18 @@ class InkqueryTheme {
 
     final textTheme = GoogleFonts.dmSansTextTheme().copyWith(
       headlineLarge: GoogleFonts.spaceGrotesk(
-        fontSize: 32,
+        fontSize: 30,
         fontWeight: FontWeight.w700,
         color: _ink,
-        letterSpacing: -1.2,
+        letterSpacing: -0.8,
       ),
       headlineMedium: GoogleFonts.spaceGrotesk(
-        fontSize: 26,
+        fontSize: 24,
         fontWeight: FontWeight.w700,
         color: _ink,
       ),
       titleLarge: GoogleFonts.spaceGrotesk(
-        fontSize: 20,
+        fontSize: 19,
         fontWeight: FontWeight.w700,
         color: _ink,
       ),
@@ -70,18 +73,18 @@ class InkqueryTheme {
       ),
       bodyLarge: GoogleFonts.dmSans(
         fontSize: 16,
-        height: 1.45,
+        height: 1.4,
         color: _ink,
       ),
       bodyMedium: GoogleFonts.dmSans(
         fontSize: 14,
-        height: 1.45,
+        height: 1.4,
         color: _ink,
       ),
       bodySmall: GoogleFonts.dmSans(
         fontSize: 12,
         height: 1.35,
-        color: const Color(0xFF516366),
+        color: _muted,
       ),
       labelLarge: GoogleFonts.spaceGrotesk(
         fontSize: 14,
@@ -92,72 +95,77 @@ class InkqueryTheme {
 
     return ThemeData(
       colorScheme: scheme,
-      scaffoldBackgroundColor: _paper,
+      scaffoldBackgroundColor: paper,
       textTheme: textTheme,
       useMaterial3: true,
-      cardTheme: CardThemeData(
-        color: Colors.white.withValues(alpha: 0.78),
+      dividerColor: _line,
+      appBarTheme: AppBarTheme(
+        backgroundColor: _panel,
+        foregroundColor: _ink,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        titleTextStyle: textTheme.titleLarge,
+      ),
+      cardTheme: CardThemeData(
+        color: _panel,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: EdgeInsets.zero,
       ),
       chipTheme: ChipThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        side: BorderSide.none,
-        backgroundColor: scheme.surfaceContainer,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        side: const BorderSide(color: _line),
+        backgroundColor: scheme.surfaceContainerLow,
         selectedColor: scheme.primaryContainer,
         labelStyle: textTheme.labelLarge!,
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: Colors.white.withValues(alpha: 0.88),
+        backgroundColor: _panel,
         indicatorColor: scheme.secondaryContainer,
         labelTextStyle: WidgetStatePropertyAll(textTheme.labelLarge),
       ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          minimumSize: const Size(0, 44),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          minimumSize: const Size(0, 44),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          side: const BorderSide(color: _line),
+        ),
+      ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.75),
+        fillColor: _panel,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(22),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _line),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(22),
-          borderSide: BorderSide(color: scheme.outlineVariant),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: _line),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: scheme.primary, width: 1.4),
         ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       ),
     );
   }
 
-  static const backgroundDecoration = BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        Color(0xFFF9F2E7),
-        Color(0xFFE8F0EE),
-        Color(0xFFF5E6D3),
-      ],
-      stops: [0, 0.55, 1],
-    ),
-  );
+  static const backgroundDecoration = BoxDecoration(color: paper);
 
-  static BoxDecoration glassPanel(BuildContext context) {
+  static BoxDecoration panelDecoration(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.72),
-      borderRadius: BorderRadius.circular(28),
-      border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.8)),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.05),
-          blurRadius: 24,
-          offset: const Offset(0, 10),
-        ),
-      ],
+      color: scheme.surface,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: scheme.outlineVariant),
     );
   }
 }

@@ -56,19 +56,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
         InkPanel(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 12,
+            spacing: 10,
             children: [
               Text('Current account', style: theme.textTheme.titleLarge),
               Text(session.account.title, style: theme.textTheme.titleMedium),
               Text(session.account.serverUrl, style: theme.textTheme.bodySmall),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  Chip(label: Text(session.user.role)),
-                  if (session.user.email?.isNotEmpty == true)
-                    Chip(label: Text(session.user.email!)),
-                ],
+              Text(
+                [
+                  session.user.role,
+                  if (session.user.email?.isNotEmpty == true) session.user.email!,
+                ].join('  ·  '),
+                style: theme.textTheme.bodySmall,
               ),
               Wrap(
                 spacing: 10,
@@ -93,7 +91,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         InkPanel(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            spacing: 12,
+            spacing: 8,
             children: [
               Text('Saved accounts', style: theme.textTheme.titleLarge),
               ...auth.accounts.map(
@@ -144,9 +142,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      Chip(label: Text('${dashboard.counts.books} books')),
-                      Chip(label: Text('${dashboard.counts.passages} passages')),
-                      Chip(label: Text('${dashboard.counts.entities} entities')),
+                      Text('${dashboard.counts.books} books', style: theme.textTheme.bodySmall),
+                      Text('${dashboard.counts.passages} passages', style: theme.textTheme.bodySmall),
+                      Text('${dashboard.counts.entities} entities', style: theme.textTheme.bodySmall),
                     ],
                   ),
                   ...dashboard.connectors.map(
@@ -154,7 +152,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       contentPadding: EdgeInsets.zero,
                       title: Text(connector.name),
                       subtitle: Text(connector.detail),
-                      trailing: Chip(label: Text(connector.status)),
+                      trailing: Text(connector.status, style: theme.textTheme.bodySmall),
                     ),
                   ),
                 ],
@@ -212,7 +210,7 @@ class _SavedAccountTile extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(account.username),
-      subtitle: Text(account.serverUrl),
+      subtitle: Text(account.hostLabel),
       leading: Icon(
         account.scopeKey == activeScopeKey
             ? Icons.radio_button_checked
@@ -226,6 +224,7 @@ class _SavedAccountTile extends StatelessWidget {
             FilledButton.tonal(onPressed: onSwitch, child: const Text('Switch')),
         ],
       ),
+      dense: true,
     );
   }
 }
@@ -278,6 +277,10 @@ class _AddAccountSheetState extends State<_AddAccountSheet> {
         children: [
           const SizedBox(height: 4),
           Text('Add another account', style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            'Use this for another household member or another Inkquery server.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
           TextField(
             controller: _serverController,
             decoration: const InputDecoration(labelText: 'Server URL'),

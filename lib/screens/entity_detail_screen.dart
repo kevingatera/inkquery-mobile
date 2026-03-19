@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +38,7 @@ class _EntityDetailScreenState extends State<EntityDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Entity detail')),
+      appBar: AppBar(title: const Text('Entity')),
       body: FutureBuilder<EntityDetail>(
         future: _future,
         builder: (context, snapshot) {
@@ -47,19 +49,33 @@ class _EntityDetailScreenState extends State<EntityDetailScreen> {
             return Center(child: Text('${snapshot.error}'));
           }
           final entity = snapshot.data!;
+          final aliases = _parseAliases(entity.aliasesJson);
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
               InkPanel(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 10,
+                  spacing: 8,
                   children: [
                     Text(entity.name, style: theme.textTheme.headlineMedium),
-                    Chip(label: Text(entity.kind)),
+                    Text(
+                      [
+                        entity.kind,
+                        '${entity.mentions.length} mentions',
+                        if (aliases.isNotEmpty) '${aliases.length} aliases',
+                      ].join('  ·  '),
+                      style: theme.textTheme.bodySmall,
+                    ),
                     Text(entity.summary, style: theme.textTheme.bodyMedium),
-                    if (entity.aliasesJson.isNotEmpty)
-                      Text(entity.aliasesJson, style: theme.textTheme.bodySmall),
+                    if (aliases.isNotEmpty)
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: aliases
+                            .map((alias) => Chip(label: Text(alias)))
+                            .toList(),
+                      ),
                   ],
                 ),
               ),
@@ -70,13 +86,19 @@ class _EntityDetailScreenState extends State<EntityDetailScreen> {
                   child: InkPanel(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 8,
+                      spacing: 6,
                       children: [
                         Text(mention.title, style: theme.textTheme.titleMedium),
                         Text(
-                          mention.chapterLabel?.isNotEmpty == true
-                              ? mention.chapterLabel!
-                              : 'Mention',
+                          [
+                            if (mention.chapterLabel?.isNotEmpty == true) mention.chapterLabel!,
+                            if (mention.publishedDate?.isNotEmpty == true) mention.publishedDate!,
+                          ].join('  ·  ').isEmpty
+                              ? 'Mention'
+                              : [
+                                  if (mention.chapterLabel?.isNotEmpty == true) mention.chapterLabel!,
+                                  if (mention.publishedDate?.isNotEmpty == true) mention.publishedDate!,
+                                ].join('  ·  '),
                           style: theme.textTheme.bodySmall,
                         ),
                         Text(mention.excerpt, style: theme.textTheme.bodyMedium),
@@ -90,5 +112,18 @@ class _EntityDetailScreenState extends State<EntityDetailScreen> {
         },
       ),
     );
+  }
+
+  List<String> _parseAliases(String raw) {
+    if (raw.trim().isEmpty) {
+      return const [];
+    }
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is List) {
+        return decoded.whereType<String>().where((value) => value.trim().isNotEmpty).toList();
+      }
+    } catch (_) {}
+    return [raw];
   }
 }

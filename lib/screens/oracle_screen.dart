@@ -58,24 +58,43 @@ class _OracleScreenState extends State<OracleScreen> {
       child: Column(
         children: [
           InkPanel(
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 10,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Ask about people, factions, or sidebook lore.',
-                          style: theme.textTheme.titleMedium),
-                      const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        controller.messages.isEmpty
+                            ? 'Start a query'
+                            : '${controller.messages.where((entry) => entry.isUser).length} questions in this session',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                    ),
+                    if (controller.stage != null)
                       Text(
-                        'Streaming answers arrive in phases and keep their citations attached.',
+                        _stageLabel(controller.stage!),
                         style: theme.textTheme.bodySmall,
                       ),
-                    ],
-                  ),
+                  ],
                 ),
-                if (controller.stage != null)
-                  Chip(label: Text(_stageLabel(controller.stage!))),
+                if (controller.suggestions.isNotEmpty && controller.messages.isEmpty)
+                  SizedBox(
+                    height: 38,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: controller.suggestions.length,
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final suggestion = controller.suggestions[index];
+                        return ActionChip(
+                          label: Text(suggestion),
+                          onPressed: () => _sendSuggested(context, suggestion),
+                        );
+                      },
+                    ),
+                  ),
               ],
             ),
           ),
@@ -123,26 +142,35 @@ class _OracleScreenState extends State<OracleScreen> {
           ],
           const SizedBox(height: 10),
           InkPanel(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            padding: const EdgeInsets.all(12),
+            child: Column(
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _composerController,
-                    minLines: 1,
-                    maxLines: 5,
-                    onChanged: controller.updateDraft,
-                    onSubmitted: controller.isSending ? null : (_) => _send(context),
-                    decoration: const InputDecoration(
-                      hintText: 'Ask who appeared first, where an alias was used, or what book a clue comes from.',
-                    ),
+                TextField(
+                  controller: _composerController,
+                  minLines: 1,
+                  maxLines: 5,
+                  onChanged: controller.updateDraft,
+                  onSubmitted: controller.isSending ? null : (_) => _send(context),
+                  decoration: const InputDecoration(
+                    hintText: 'Ask about a character, place, faction, or source passage.',
                   ),
                 ),
-                const SizedBox(width: 12),
-                FilledButton(
-                  onPressed: controller.isSending ? null : () => _send(context),
-                  child: const Icon(Icons.arrow_upward_rounded),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        controller.stage == null
+                            ? 'Grounded answers only'
+                            : 'Working: ${_stageLabel(controller.stage!)}',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                    ),
+                    FilledButton(
+                      onPressed: controller.isSending ? null : () => _send(context),
+                      child: const Text('Send'),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -181,15 +209,22 @@ class _MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final alignment = entry.isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final bubbleColor = entry.isUser
-        ? theme.colorScheme.primary
-        : Colors.white.withValues(alpha: 0.82);
+    final bubbleColor = entry.isUser ? theme.colorScheme.primary : theme.colorScheme.surface;
     final textColor = entry.isUser ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface;
+    final label = entry.isUser ? 'You' : 'Oracle';
+    final meta = [
+      if (!entry.isUser && entry.responseMode != null) entry.responseMode,
+      if (!entry.isUser && entry.citations.isNotEmpty) '${entry.citations.length} sources',
+    ].whereType<String>().join('  ·  ');
 
     return Column(
       crossAxisAlignment: alignment,
       spacing: 8,
       children: [
+        Text(
+          meta.isEmpty ? label : '$label  ·  $meta',
+          style: theme.textTheme.bodySmall,
+        ),
         Align(
           alignment: entry.isUser ? Alignment.centerRight : Alignment.centerLeft,
           child: ConstrainedBox(
@@ -197,7 +232,8 @@ class _MessageBubble extends StatelessWidget {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: bubbleColor,
-                borderRadius: BorderRadius.circular(24),
+                border: entry.isUser ? null : Border.all(color: theme.colorScheme.outlineVariant),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -210,18 +246,16 @@ class _MessageBubble extends StatelessWidget {
           ),
         ),
         if (!entry.isUser && entry.citations.isNotEmpty)
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          Column(
             children: entry.citations
                 .map(
-                  (citation) => SizedBox(
-                    width: 260,
+                  (citation) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: InkPanel(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 6,
+                        spacing: 4,
                         children: [
                           Text(citation.title, style: theme.textTheme.titleMedium),
                           Text(citation.locator, style: theme.textTheme.bodySmall),
@@ -234,13 +268,16 @@ class _MessageBubble extends StatelessWidget {
                 .toList(),
           ),
         if (!entry.isUser && entry.actionHints.isNotEmpty)
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: entry.actionHints
                 .map(
-                  (hint) => Chip(
-                    label: Text('${hint.label}: ${hint.detail}'),
+                  (hint) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      '${hint.label}: ${hint.detail}',
+                      style: theme.textTheme.bodySmall,
+                    ),
                   ),
                 )
                 .toList(),

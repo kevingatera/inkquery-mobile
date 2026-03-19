@@ -49,13 +49,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
           InkPanel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 12,
+              spacing: 10,
               children: [
                 Text('Browse the ingested shelf', style: theme.textTheme.titleLarge),
-                Text(
-                  'Filter by title, author, or series. Pull down to refresh from the server.',
-                  style: theme.textTheme.bodyMedium,
-                ),
                 TextField(
                   controller: _searchController,
                   onChanged: controller.setFilter,
@@ -63,6 +59,10 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     prefixIcon: Icon(Icons.search),
                     hintText: 'Search by title, series, or author',
                   ),
+                ),
+                Text(
+                  '${controller.filteredItems.length} of ${controller.items.length} books visible',
+                  style: theme.textTheme.bodySmall,
                 ),
               ],
             ),
@@ -111,7 +111,7 @@ class _BookCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(12),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
@@ -120,41 +120,43 @@ class _BookCard extends StatelessWidget {
         );
       },
       child: InkPanel(
-        child: Column(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 8,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: 4,
-                    children: [
-                      Text(book.title, style: theme.textTheme.titleLarge),
-                      Text(
-                        [
-                          if (book.authorName?.isNotEmpty == true) book.authorName,
-                          if (book.seriesName?.isNotEmpty == true) book.seriesName,
-                        ].join(' • '),
-                        style: theme.textTheme.bodySmall,
-                      ),
-                    ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 3,
+                children: [
+                  Text(book.title, style: theme.textTheme.titleMedium),
+                  Text(
+                    [
+                      if (book.authorName?.isNotEmpty == true) book.authorName,
+                      if (book.seriesName?.isNotEmpty == true) book.seriesName,
+                    ].join(' • '),
+                    style: theme.textTheme.bodySmall,
                   ),
-                ),
-                Chip(label: Text(book.status)),
-              ],
+                  Text(
+                    [
+                      if (book.fileFormat?.isNotEmpty == true) book.fileFormat!,
+                      if (book.publishedDate?.isNotEmpty == true) book.publishedDate!,
+                      book.status,
+                    ].join('  ·  '),
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  if (book.sourcePath?.isNotEmpty == true)
+                    Text(
+                      book.sourcePath!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                ],
+              ),
             ),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                Chip(label: Text('${book.passageCount} passages')),
-                if (book.fileFormat?.isNotEmpty == true) Chip(label: Text(book.fileFormat!)),
-                if (book.publishedDate?.isNotEmpty == true) Chip(label: Text(book.publishedDate!)),
-              ],
-            ),
+            const SizedBox(width: 12),
+            Text('${book.passageCount}', style: theme.textTheme.titleMedium),
           ],
         ),
       ),

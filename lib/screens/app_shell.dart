@@ -31,13 +31,20 @@ class _AppShellState extends State<AppShell> {
     'Entities',
     'Settings',
   ];
+  static const _subtitles = [
+    'Ask grounded questions and inspect citations.',
+    'Browse the ingested shelf and open sample passages.',
+    'Search extracted people, places, factions, and concepts.',
+    'Switch accounts and check the connected server.',
+  ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final user = context.select<AuthController, String?>(
-      (auth) => auth.session?.user.username,
-    );
+    final session = context.select<AuthController, dynamic>((auth) => auth.session);
+    final user = session?.user.username as String?;
+    final role = session?.user.role as String?;
+    final host = session?.account.hostLabel as String?;
 
     return Scaffold(
       body: DecoratedBox(
@@ -46,36 +53,66 @@ class _AppShellState extends State<AppShell> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _titles[_index],
-                            style: theme.textTheme.headlineMedium,
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    border: Border.all(color: theme.colorScheme.outlineVariant),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 2,
+                            children: [
+                              Text(
+                                _titles[_index],
+                                style: theme.textTheme.headlineMedium,
+                              ),
+                              Text(
+                                _subtitles[_index],
+                                style: theme.textTheme.bodySmall,
+                              ),
+                              if (host != null || user != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    [
+                                      host,
+                                      user,
+                                      role,
+                                    ].whereType<String>().join('  ·  '),
+                                    style: theme.textTheme.bodySmall,
+                                  ),
+                                ),
+                            ],
                           ),
-                          if (user != null)
-                            Text(
-                              'Signed in as $user',
-                              style: theme.textTheme.bodySmall,
+                        ),
+                        if (user != null)
+                          Container(
+                            width: 36,
+                            height: 36,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainer,
+                              border: Border.all(color: theme.colorScheme.outlineVariant),
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                        ],
-                      ),
+                            child: Text(
+                              user.isNotEmpty ? user[0].toUpperCase() : 'I',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                          ),
+                      ],
                     ),
-                    CircleAvatar(
-                      backgroundColor: theme.colorScheme.secondaryContainer,
-                      foregroundColor: theme.colorScheme.onSecondaryContainer,
-                      child: Text(
-                        (user?.isNotEmpty == true ? user![0] : 'I').toUpperCase(),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-              const Divider(height: 1),
+              Divider(height: 1, color: theme.colorScheme.outlineVariant),
               const Expanded(
                 child: IndexedStack(children: _pages),
               ),
@@ -84,6 +121,7 @@ class _AppShellState extends State<AppShell> {
         ),
       ),
       bottomNavigationBar: NavigationBar(
+        height: 62,
         selectedIndex: _index,
         onDestinationSelected: (value) => setState(() => _index = value),
         destinations: const [

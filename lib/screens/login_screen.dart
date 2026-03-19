@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../models/auth_models.dart';
 import '../providers/auth_controller.dart';
+import '../theme/inkquery_theme.dart';
 import '../widgets/ink_panel.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -46,145 +47,121 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       body: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFFF8EDDE),
-              Color(0xFFE0EEEA),
-              Color(0xFFF6DFC9),
-            ],
-          ),
-        ),
+        decoration: const BoxDecoration(color: InkqueryTheme.paper),
         child: SafeArea(
           child: Consumer<AuthController>(
             builder: (context, auth, _) {
               final capabilities = auth.capabilities;
               return SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 18,
-                  children: [
-                    Text(
-                      'Inkquery on your phone',
-                      style: theme.textTheme.headlineLarge,
-                    ),
-                    Text(
-                      'Point the app at your Inkquery API, sign in with a local household account, and carry the oracle, library, and entity graph with you.',
-                      style: theme.textTheme.bodyLarge,
-                    ),
-                    InkPanel(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 14,
-                        children: [
-                          Text('Connect to a server', style: theme.textTheme.titleLarge),
-                          TextField(
-                            controller: _serverController,
-                            keyboardType: TextInputType.url,
-                            textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Inkquery API URL',
-                              hintText: 'http://192.168.1.108:8420',
-                            ),
-                          ),
-                          TextField(
-                            controller: _usernameController,
-                            textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Username',
-                            ),
-                          ),
-                          TextField(
-                            controller: _passwordController,
-                            obscureText: true,
-                            onSubmitted: (_) => _submit(context),
-                            decoration: const InputDecoration(
-                              labelText: 'Password',
-                            ),
-                          ),
-                          if (auth.errorMessage != null)
-                            Text(
-                              auth.errorMessage!,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.error,
-                              ),
-                            ),
-                          Wrap(
-                            spacing: 10,
-                            runSpacing: 10,
+                padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 560),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 14,
+                      children: [
+                        Text('Inkquery', style: theme.textTheme.headlineLarge),
+                        Text(
+                          'Sign in to your household server.',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        InkPanel(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 12,
                             children: [
-                              OutlinedButton.icon(
-                                onPressed: auth.isBusy
-                                    ? null
-                                    : () => auth.inspectServer(_serverController.text),
-                                icon: const Icon(Icons.radar_outlined),
-                                label: const Text('Check server'),
+                              TextField(
+                                controller: _serverController,
+                                keyboardType: TextInputType.url,
+                                textInputAction: TextInputAction.next,
+                                decoration: const InputDecoration(
+                                  labelText: 'Server',
+                                  hintText: 'http://192.168.1.108:8420',
+                                ),
                               ),
-                              FilledButton.icon(
-                                onPressed: auth.isBusy ? null : () => _submit(context),
-                                icon: auth.isBusy
-                                    ? const SizedBox.square(
-                                        dimension: 16,
-                                        child: CircularProgressIndicator(strokeWidth: 2),
-                                      )
-                                    : const Icon(Icons.login_rounded),
-                                label: Text(auth.isBusy ? 'Signing in...' : 'Sign in'),
+                              TextField(
+                                controller: _usernameController,
+                                textInputAction: TextInputAction.next,
+                                decoration: const InputDecoration(labelText: 'Username'),
+                              ),
+                              TextField(
+                                controller: _passwordController,
+                                obscureText: true,
+                                onSubmitted: (_) => _submit(context),
+                                decoration: const InputDecoration(labelText: 'Password'),
+                              ),
+                              if (auth.errorMessage != null)
+                                Text(
+                                  auth.errorMessage!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.error,
+                                  ),
+                                ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: auth.isBusy
+                                          ? null
+                                          : () => auth.inspectServer(_serverController.text),
+                                      child: const Text('Check server'),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: FilledButton(
+                                      onPressed: auth.isBusy ? null : () => _submit(context),
+                                      child: Text(auth.isBusy ? 'Signing in...' : 'Sign in'),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          if (capabilities != null)
-                            Wrap(
+                        ),
+                        if (capabilities != null)
+                          InkPanel(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               spacing: 8,
-                              runSpacing: 8,
                               children: [
-                                Chip(
-                                  label: Text(
-                                    capabilities.authRequired
-                                        ? 'Auth required'
-                                        : 'Auth optional',
-                                  ),
-                                ),
-                                Chip(
-                                  label: Text(
-                                    capabilities.localEnabled
-                                        ? 'Local accounts enabled'
-                                        : 'Local accounts disabled',
-                                  ),
-                                ),
-                                if (capabilities.oidcEnabled)
-                                  Chip(
-                                    label: Text(
+                                Text('Server capabilities', style: theme.textTheme.titleMedium),
+                                Text(
+                                  [
+                                    capabilities.authRequired ? 'Auth required' : 'Auth optional',
+                                    capabilities.localEnabled ? 'Local accounts' : 'Local disabled',
+                                    if (capabilities.oidcEnabled)
                                       capabilities.oidcLabel?.isNotEmpty == true
                                           ? capabilities.oidcLabel!
-                                          : 'OIDC available',
-                                    ),
-                                  ),
+                                          : 'OIDC',
+                                  ].join('  ·  '),
+                                  style: theme.textTheme.bodySmall,
+                                ),
                               ],
                             ),
-                        ],
-                      ),
-                    ),
-                    if (auth.accounts.isNotEmpty)
-                      InkPanel(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          spacing: 12,
-                          children: [
-                            Text('Saved accounts', style: theme.textTheme.titleLarge),
-                            ...auth.accounts.map(
-                              (account) => _SavedAccountRow(
-                                account: account,
-                                onSwitch: () => auth.switchAccount(account.scopeKey),
-                                onDelete: () => auth.removeAccount(account.scopeKey),
-                              ),
+                          ),
+                        if (auth.accounts.isNotEmpty)
+                          InkPanel(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              spacing: 8,
+                              children: [
+                                Text('Saved accounts', style: theme.textTheme.titleLarge),
+                                ...auth.accounts.map(
+                                  (account) => _SavedAccountRow(
+                                    account: account,
+                                    onSwitch: () => auth.switchAccount(account.scopeKey),
+                                    onDelete: () => auth.removeAccount(account.scopeKey),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                  ],
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },
@@ -218,29 +195,35 @@ class _SavedAccountRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Ink(
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.72),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-        title: Text(account.username, style: theme.textTheme.titleMedium),
-        subtitle: Text(account.serverUrl),
-        trailing: Wrap(
-          spacing: 8,
-          children: [
-            IconButton(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline),
-              tooltip: 'Remove account',
-            ),
-            FilledButton.tonal(
-              onPressed: onSwitch,
-              child: const Text('Use'),
-            ),
-          ],
+        border: Border(
+          bottom: BorderSide(color: theme.colorScheme.outlineVariant),
         ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 2,
+              children: [
+                Text(account.username, style: theme.textTheme.titleMedium),
+                Text(account.hostLabel, style: theme.textTheme.bodySmall),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onDelete,
+            icon: const Icon(Icons.delete_outline),
+            tooltip: 'Remove account',
+          ),
+          FilledButton.tonal(
+            onPressed: onSwitch,
+            child: const Text('Use'),
+          ),
+        ],
       ),
     );
   }

@@ -36,7 +36,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Book detail')),
+      appBar: AppBar(title: const Text('Book')),
       body: FutureBuilder<BookDetail>(
         future: _future,
         builder: (context, snapshot) {
@@ -53,7 +53,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               InkPanel(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: 10,
+                  spacing: 8,
                   children: [
                     Text(book.title, style: theme.textTheme.headlineMedium),
                     Text(
@@ -63,16 +63,14 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                       ].join(' • '),
                       style: theme.textTheme.bodyMedium,
                     ),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        Chip(label: Text(book.status)),
-                        Chip(label: Text('${book.passageCount} passages')),
-                        if (book.fileFormat?.isNotEmpty == true) Chip(label: Text(book.fileFormat!)),
-                        if (book.publishedDate?.isNotEmpty == true)
-                          Chip(label: Text(book.publishedDate!)),
-                      ],
+                    Text(
+                      [
+                        book.status,
+                        '${book.passageCount} passages',
+                        if (book.fileFormat?.isNotEmpty == true) book.fileFormat!,
+                        if (book.publishedDate?.isNotEmpty == true) book.publishedDate!,
+                      ].join('  ·  '),
+                      style: theme.textTheme.bodySmall,
                     ),
                     if (book.sourcePath?.isNotEmpty == true)
                       Text(book.sourcePath!, style: theme.textTheme.bodySmall),
@@ -83,11 +81,11 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               ...book.samplePassages.map(
                 (passage) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: InkPanel(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 8,
-                      children: [
+                    child: InkPanel(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 6,
+                        children: [
                         Text(
                           passage.chapterLabel?.isNotEmpty == true
                               ? passage.chapterLabel!

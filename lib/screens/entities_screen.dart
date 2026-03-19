@@ -49,13 +49,9 @@ class _EntitiesScreenState extends State<EntitiesScreen> {
           InkPanel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 12,
+              spacing: 10,
               children: [
                 Text('Entity graph', style: theme.textTheme.titleLarge),
-                Text(
-                  'Search characters, houses, locations, and concepts extracted from the books.',
-                  style: theme.textTheme.bodyMedium,
-                ),
                 Row(
                   children: [
                     Expanded(
@@ -72,9 +68,13 @@ class _EntitiesScreenState extends State<EntitiesScreen> {
                     const SizedBox(width: 10),
                     FilledButton(
                       onPressed: controller.loadEntities,
-                      child: const Icon(Icons.arrow_forward),
+                      child: const Text('Search'),
                     ),
                   ],
+                ),
+                Text(
+                  '${controller.items.length} results${controller.selectedKind.isNotEmpty ? ' in ${controller.selectedKind}' : ''}',
+                  style: theme.textTheme.bodySmall,
                 ),
                 Wrap(
                   spacing: 8,
@@ -141,7 +141,7 @@ class _EntityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
-      borderRadius: BorderRadius.circular(28),
+      borderRadius: BorderRadius.circular(12),
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
@@ -152,14 +152,14 @@ class _EntityCard extends StatelessWidget {
       child: InkPanel(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 10,
+          spacing: 8,
           children: [
             Row(
               children: [
                 Expanded(
                   child: Text(entity.name, style: theme.textTheme.titleLarge),
                 ),
-                Chip(label: Text(entity.kind)),
+                Text(entity.kind, style: theme.textTheme.bodySmall),
               ],
             ),
             Text(entity.summary, style: theme.textTheme.bodyMedium),
